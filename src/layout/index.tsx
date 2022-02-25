@@ -1,18 +1,21 @@
-import React, { ReactNode } from 'react'
+import React from 'react'
 
 import { Container, Content } from './styles'
+
 import { Header, Footer } from '../components'
 
-interface Props {
-  children: ReactNode
+interface LayoutProps {
+  page: JSX.Element
 }
 
-export default function Layout({ children }: Props) {
+export default function Layout({ page }: LayoutProps) {
   return (
     <Container>
-      <Header />
-        <Content>{children}</Content>
-      <Footer />
+      <Content>
+        <Header />
+        {page}
+        <Footer />
+      </Content>
     </Container>
   )
 }

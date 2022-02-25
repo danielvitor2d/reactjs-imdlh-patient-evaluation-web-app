@@ -14,6 +14,7 @@ import GlobalStyles from './theme/global'
 import theme from './theme/theme'
 
 import Routes from './routes/SignRoutes'
+import { AuthProvider } from './contexts/Auth';
 
 Chart.register(RadialLinearScale)
 Chart.register(PointElement)
@@ -24,7 +25,9 @@ ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <Routes />
+      <AuthProvider>
+        <Routes />
+      </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>,
   document.getElementById('root')

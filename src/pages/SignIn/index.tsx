@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useForm } from 'react-hook-form'
 import {
@@ -12,34 +12,32 @@ import {
   MainContent
 } from './styles'
 
-import { Footer, Header } from '../../components'
-import { format, validate } from '../../utils/documentTreatment'
-import { api } from '../../services/api'
+import { Footer } from '../../components'
+
 import { Alert } from '../../modals'
 
-type User = {
-  birth_date: string
-  created_at: string
-  email: string
-  fullname: string
-  id: string
-  isRootUser: string
-  updated_at: string
+import { AuthContext } from '../../contexts'
+import { validate } from '../../utils/documentTreatment'
+
+type Patient = {
+  patient_id: string
 }
 
+type User = {
+  id: string
+}
 type SignInRequest = {
   document: string
-}
-
-type SignInResponse = {
-  success: string,
-  user: User,
-  token: string
 }
 
 export default function SignIn() {
   const navigate = useNavigate()
   const { register, handleSubmit } = useForm()
+
+  const authContext = useContext(AuthContext)
+
+  const [userNotFoundModal, setUserNotFoundModal] = useState(false)
+  const [invalidDocumentModal, setInvalidDocumentModal] = useState(false)
 
   /**
    * role responsible for authenticating the user with the credentials in the 
@@ -48,39 +46,28 @@ export default function SignIn() {
    * @param data 
    */
   async function handleSignIn(data: SignInRequest) {
-    if (data) {
-      await validate(format(data.document)).then(async response => {
-        if (response) {
-          const { document } = data
-          try {
-            await api.post('/users/sessions', { document }).then(response => {
-              const { token, user } = response.data as SignInResponse
-    
-              localStorage.setItem('token', token)
-              localStorage.setItem('user', JSON.stringify(user))
-
-              if (user.isRootUser === '0') {
-                navigate('/home')
-              } else {
-                navigate('/dashboard')
-              }
-            })
-          } catch (error) {
-            handleOpenUnfModal()
-          }
-        } else {
-          console.log('Auth | SignIn | The passwords entered do not match, enter them again.')
-          handleOpensetIdModal()
-        }
-      })
+    const { document } = data
+    if (!validate(document)) {
+      handleOpenInvalidDocumentModal()
+    } else {
+      authContext
+        .login(document)
+        .then(() => {
+          navigate('/')
+        })
+        .catch((err) => {
+          console.log(err)
+          handleOpenUserNotFoundModal()
+        })
     }
   }
 
   function handleIfAuthRedirect() {
-    const user = JSON.parse(localStorage.getItem('user') as string)
+    const user: User = JSON.parse(localStorage.getItem('user') as string)
+    const patient: Patient = JSON.parse(localStorage.getItem('user') as string)
 
     if (user) {
-      if (user.isRootUser === '0') {
+      if (!patient.patient_id) {
         console.log(`
           you are a regular user and you are already logged in to the application.
           redirecting...
@@ -97,51 +84,44 @@ export default function SignIn() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // User not found Modal
-  const [unfModal, setUnfModal] = useState(false)
-
-  function handleOpenUnfModal() {
-    setUnfModal(true)
+  function handleOpenUserNotFoundModal() {
+    setUserNotFoundModal(true)
   }
 
-  function handleCloseUnfModal() {
-    setUnfModal(false)
+  function handleCloseUserNotFoundModal() {
+    setUserNotFoundModal(false)
   }
 
-  // Invalid Document found Modal
-  const [idModal, setIdModal] = useState(false)
-
-  function handleOpensetIdModal() {
-    setIdModal(true)
+  function handleOpenInvalidDocumentModal() {
+    setInvalidDocumentModal(true)
   }
 
-  function handleClosesetIdModal() {
-    setIdModal(false)
+  function handleCloseInvalidDocumentModal() {
+    setInvalidDocumentModal(false)
   }
 
   return (
     <Container>
       <Alert
-        isOpen={unfModal}
+        isOpen={userNotFoundModal}
         message={`
           Não foi encontrado em nossa base de dados nenhum usuário com as credenciais
           informadas. Tente novamente.
         `}
-        onCloseFunc={handleCloseUnfModal}
+        onCloseFunc={handleCloseUserNotFoundModal}
         title="Erro ao logar"
         type="error"
       />
       <Alert
-        isOpen={idModal}
+        isOpen={invalidDocumentModal}
         message={`Informe-o novamente sem pontuação ou vírgulas.`}
-        onCloseFunc={handleClosesetIdModal}
+        onCloseFunc={handleCloseInvalidDocumentModal}
         title="Documento inválido"
         type="warning"
       />
-      <Header />
       <MainContent maxWidth="xs" sx={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center'
       }}>

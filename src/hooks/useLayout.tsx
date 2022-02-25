@@ -3,11 +3,9 @@ import Layout from '../layout'
 
 export function useLayout() {
   return {
-    getMinimalLayout: (screen: JSX.Element) => {
+    getMinimalLayout: (page: JSX.Element) => {
       return (
-        <Layout>
-          {screen}
-        </Layout>
+        <Layout page={page} ></Layout>
       )
     }
   }

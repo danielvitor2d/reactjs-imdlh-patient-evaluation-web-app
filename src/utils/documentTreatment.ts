@@ -4,18 +4,16 @@ export function format(value: string) {
   return formattedDocument
 }
 
-export async function validate(value: string) {
-  if (value.length !== 14) return false;
+export function validate(value: string) {
+  if (value.length !== 11) return false;
   
   let cpf_str = value.trim();
   
-  cpf_str = cpf_str.replace(/\./g, '');
-  cpf_str = cpf_str.replace('-', '');
   const cpf_arr_str = cpf_str.split('');
   
   const cpf: Array<number> = [];
   
-  for await(const item of cpf_arr_str) {
+  for (const item of cpf_arr_str) {
     cpf.push(parseInt(item));
   }
   

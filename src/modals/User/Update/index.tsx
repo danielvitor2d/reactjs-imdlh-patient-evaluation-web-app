@@ -57,39 +57,37 @@ export default function Update(props: PopUpProps) {
   async function handleUpdate(data: UpdateRequest) {
     if (data) {
       try {
-        await validate(format(data.document)).then(async response => {
-          if (response) {
-            if (data.password === data.password_confirmed) {
-              const {
-                firstname,
-                lastname,
+        if (validate(format(data.document))) {
+          if (data.password === data.password_confirmed) {
+            const {
+              firstname,
+              lastname,
+              document,
+              birth_date,
+              email,
+              password,
+            } = data as UpdateRequest
+            
+            try {
+              await api.put(`users/${selectedId}`, {
+                fullname: `${firstname} ${lastname}`,
                 document,
                 birth_date,
                 email,
                 password,
-              } = data as UpdateRequest
-              
-              try {
-                await api.put(`users/${selectedId}`, {
-                  fullname: `${firstname} ${lastname}`,
-                  document,
-                  birth_date,
-                  email,
-                  password,
-                }).then(() => {
-                  clearFields()
-                  onCloseFunc()
-                })
-              } catch (error) {
-                handleOpenDbUser()
-              }
-            } else {
-              handleOpenDifferentPasswordsModal()
+              }).then(() => {
+                clearFields()
+                onCloseFunc()
+              })
+            } catch (error) {
+              handleOpenDbUser()
             }
           } else {
-            handleOpenInvalidDocument()
+            handleOpenDifferentPasswordsModal()
           }
-        })
+        } else {
+          handleOpenInvalidDocument()
+        }
       } catch (error) {
         console.error(`
           It was not possible to execute the document validation function

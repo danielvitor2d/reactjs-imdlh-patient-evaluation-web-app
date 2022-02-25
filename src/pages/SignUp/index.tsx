@@ -30,40 +30,38 @@ export default function SignUp() {
   async function handleSignUp(data: SignUpRequest) {
     if (data) {
       try {
-        await validate(format(data.document)).then(async (response) => {
-          if (response) {
-            if (data.password === data.password_confirmed) {
-              const {
-                firstname,
-                lastname,
-                document,
-                birth_date,
-                email,
-                password,
-              } = data as SignUpRequest;
+        if (validate(format(data.document))) {
+          if (data.password === data.password_confirmed) {
+            const {
+              firstname,
+              lastname,
+              document,
+              birth_date,
+              email,
+              password,
+            } = data as SignUpRequest;
 
-              try {
-                await api
-                  .post("users", {
-                    fullname: `${firstname} ${lastname}`,
-                    document,
-                    birth_date,
-                    email,
-                    password,
-                  })
-                  .then(() => {
-                    navigate("/");
-                  });
-              } catch (error) {
-                handleOpenDbUser();
-              }
-            } else {
-              handleOpenDifferentPasswordsModal();
+            try {
+              await api
+                .post("users", {
+                  fullname: `${firstname} ${lastname}`,
+                  document,
+                  birth_date,
+                  email,
+                  password,
+                })
+                .then(() => {
+                  navigate("/");
+                });
+            } catch (error) {
+              handleOpenDbUser();
             }
           } else {
-            handleOpenInvalidDocument();
+            handleOpenDifferentPasswordsModal();
           }
-        });
+        } else {
+          handleOpenInvalidDocument();
+        }
       } catch (error) {
         console.error(`
           It was not possible to execute the document validation function
