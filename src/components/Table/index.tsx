@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -22,9 +22,12 @@ import Confirm from '../../modals/Confirm';
 import { api } from '../../services/api'
 import { Update } from '../../modals/User';
 import { Alert } from '../../modals';
+import { User } from '../../types';
+import { calculateAge } from '../../utils/calculateAge';
 
 interface Data {
-  id: string,
+  user_id: string,
+  patient_id: string,
   firstname: string,
   lastname: string,
   age: number,
@@ -85,13 +88,13 @@ const headCells: readonly HeadCell[] = [
     id: 'firstname',
     numeric: false,
     disablePadding: false,
-    label: 'Nome completo',
+    label: 'Nome',
   },
   {
     id: 'lastname',
     numeric: false,
     disablePadding: false,
-    label: 'Nome completo',
+    label: 'Sobrenome',
   },
   {
     id: 'age',
@@ -182,41 +185,28 @@ type Result = {
   updated_at: string
 }
 
-type User = {
-  birth_date: string
-  created_at: string
-  email: string
-  firstname: string
-  lastname: string
-  document: string
-  results: Array<Result>
-  id: string
-  isRootUser: string
-  updated_at: string
-}
-
 type TableProps = {
-  users: Array<User>
+  users: User[]
   getUserDataFunc: VoidFunction
 }
 
 export default function EnhancedTable({ users, getUserDataFunc }: TableProps) {
   const navigate = useNavigate()
 
-  const [rows, setRows] = React.useState<Array<Data>>([])
-  const [order, setOrder] = React.useState<Order>('asc');
-  const [orderBy, setOrderBy] = React.useState<keyof Data>('firstname');
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(7);
-  const [selectedId, setSelectedId] = useState('')
+  const [rows, setRows] = useState<Array<Data>>([])
+  const [order, setOrder] = useState<Order>('asc');
+  const [orderBy, setOrderBy] = useState<keyof Data>('firstname');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(7);
+  const [selectedUserId, setSelectedUserId] = useState('')
 
   function handleSelectUserId(userId: string) {
-    setSelectedId(userId)
+    setSelectedUserId(userId)
   }
 
   async function handleDelete() {
     try {
-      await api.delete(`/users/${selectedId}`).then(() => {
+      await api.delete(`/users/${selectedUserId}`).then(() => {
         getUserDataFunc()
         handleDeleteClose()
       })
@@ -231,11 +221,11 @@ export default function EnhancedTable({ users, getUserDataFunc }: TableProps) {
         await api.get(`users/${userId}`).then(response => {
           const user = response.data as User
 
-          if (user.results.length) {
-            navigate(`/results/${userId}`)
-          } else {
-            handleNrAlertOpen()
-          }
+          // if (user.results.length) {
+          //   navigate(`/results/${userId}`)
+          // } else {
+          //   handleNrAlertOpen()
+          // }
         })
       } catch (error) {
         
@@ -265,19 +255,23 @@ export default function EnhancedTable({ users, getUserDataFunc }: TableProps) {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  React.useEffect(() => {
-    console.log(users)
+  useEffect(() => {
+    const patients = users.filter((value) => {
+      return value.patient !== null
+    })
 
-    const arr = users?.map(user => {
+    const arr = patients.map(user => {
       return {
-        id: user?.id,
-        firstname: user?.firstname,
-        lastname: user?.lastname,
-        age: getAge(user?.birth_date),
-        document: format(user?.document),
-        email: user?.email,
-        birth_date: formatDate(user?.birth_date),
-        created_at: formatDate(user?.created_at)
+        user_id: user.user_id,
+        document: user.document,
+        email: user.email,
+        firstname: user.patient.firstname,
+        lastname: user.patient.lastname,
+        patient_id: user.patient_id,
+        birth_date: formatDate(user.patient.birth_date),
+        created_at: formatDate(user.created_at),
+        age: Number(calculateAge(user.patient.birth_date)),
+        options: null
       }
     }) || []
 
@@ -331,7 +325,7 @@ export default function EnhancedTable({ users, getUserDataFunc }: TableProps) {
         isOpen={updateModal}
         onCloseFunc={handleUpdateClose}
         title={`Editar dados do paciente`}
-        selectedId={selectedId}
+        selectedId={selectedUserId}
       />
       <Confirm
         isOpen={deleteConfirm}
@@ -366,9 +360,9 @@ export default function EnhancedTable({ users, getUserDataFunc }: TableProps) {
                   return (
                     <TableRow
                       hover
-                      onClick={() => { handleSelectUserId(row.id as string) }}
+                      onClick={() => { handleSelectUserId(row.user_id as string) }}
                       tabIndex={-1}
-                      key={row.id}
+                      key={row.user_id}
                     >
                       <TableCell align="right">{row.firstname}</TableCell>
                       <TableCell align="right">{row.lastname}</TableCell>
@@ -385,7 +379,7 @@ export default function EnhancedTable({ users, getUserDataFunc }: TableProps) {
                           <RiDeleteBinLine onClick={() => { handleDeleteOpen() }} />
                         </IconButton>
                         <IconButton>
-                          <RiFileChartLine onClick={() => { handleRedirect(row.id as string) }} />
+                          <RiFileChartLine onClick={() => { handleRedirect(row.user_id as string) }} />
                         </IconButton>
                       </TableCell>
                     </TableRow>

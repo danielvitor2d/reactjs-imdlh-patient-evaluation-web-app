@@ -13,7 +13,7 @@ export default function Layout({ page }: LayoutProps) {
     <Container>
       <Content>
         <Header />
-        {page}
+          {page}
         <Footer />
       </Content>
     </Container>

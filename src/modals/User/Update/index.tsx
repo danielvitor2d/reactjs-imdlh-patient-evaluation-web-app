@@ -67,7 +67,7 @@ export default function Update(props: PopUpProps) {
               email,
               password,
             } = data as UpdateRequest
-            
+
             try {
               await api.put(`users/${selectedId}`, {
                 fullname: `${firstname} ${lastname}`,
@@ -107,52 +107,52 @@ export default function Update(props: PopUpProps) {
     setValue('password_confirmed', '')
   }
 
-    // Different passwords modal
-    const [differentPasswordsModal, setDifferentPasswordsModal] = useState(false)
+  // Different passwords modal
+  const [differentPasswordsModal, setDifferentPasswordsModal] = useState(false)
 
-    function handleOpenDifferentPasswordsModal() {
-      setDifferentPasswordsModal(true)
-    }
-  
-    function handleCloseDifferentPasswordsModal() {
-      setDifferentPasswordsModal(false)
-    }
-  
-    // Invalid CPF Modal
-    const [invalidDocument, setInvalidDocument] = useState(false)
-    
-    function handleOpenInvalidDocument() {
-      setInvalidDocument(true)
-    }
-  
-    function handleCloseInvalidDocument() {
-      setInvalidDocument(false)
-    }
-  
-    // dbUser Modal
-    const [dbUser, setDbUser] = useState(false)
-    
-    function handleOpenDbUser() {
-      setDbUser(true)
-    }
-  
-    function handleCloseDbUser() {
-      setDbUser(false)
-    }
+  function handleOpenDifferentPasswordsModal() {
+    setDifferentPasswordsModal(true)
+  }
+
+  function handleCloseDifferentPasswordsModal() {
+    setDifferentPasswordsModal(false)
+  }
+
+  // Invalid CPF Modal
+  const [invalidDocument, setInvalidDocument] = useState(false)
+
+  function handleOpenInvalidDocument() {
+    setInvalidDocument(true)
+  }
+
+  function handleCloseInvalidDocument() {
+    setInvalidDocument(false)
+  }
+
+  // dbUser Modal
+  const [dbUser, setDbUser] = useState(false)
+
+  function handleOpenDbUser() {
+    setDbUser(true)
+  }
+
+  function handleCloseDbUser() {
+    setDbUser(false)
+  }
 
   useEffect(() => {
     async function handleGetDataFillFields() {
       await api.get(`/users/${selectedId}`).then(response => {
         if (response) {
           const user = response.data as User
-  
+
           if (user) {
             let lastname: string = ''
             const [firstname, ...rest] = user.fullname.split(' ')
             rest.forEach(str => {
               lastname = `${lastname} ${str}`
             })
-          
+
             setValue('firstname', firstname);
             setValue('lastname', lastname);
             setValue('document', user.document);
@@ -177,7 +177,7 @@ export default function Update(props: PopUpProps) {
       onClose={onCloseFunc}
     >
       <Container>
-      <Alert
+        <Alert
           isOpen={differentPasswordsModal}
           message={`
             As senhas informadas são incoerentes entre si.
@@ -293,7 +293,7 @@ export default function Update(props: PopUpProps) {
             </Grid>
           </Content>
           <Footer>
-          <Button
+            <Button
               variant="outlined"
               onClick={() => {
                 onCloseFunc()
@@ -314,5 +314,5 @@ export default function Update(props: PopUpProps) {
         </form>
       </Container>
     </Modal>
-)
+  )
 }

@@ -21,15 +21,15 @@ interface AuthContextData {
   signed: boolean
   login(document: string): Promise<void>
   logout(): void
-  user: User
-  patient: Patient
+  user: User | null
+  patient: Patient | null
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 
 export const AuthProvider: React.FC = ({ children }) => {
-  const [user, setUser] = useState<User>({} as User)
-  const [patient, setPatient] = useState<Patient>({} as Patient)
+  const [user, setUser] = useState<User | null>(null)
+  const [patient, setPatient] = useState<Patient | null>(null)
 
   /**
    *
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ signed: Boolean(user.id), user, patient, login, logout }}
+      value={{ signed: Boolean(user), user, patient, login, logout }}
     >
       {children}
     </AuthContext.Provider>

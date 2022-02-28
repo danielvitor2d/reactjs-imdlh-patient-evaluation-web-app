@@ -28,10 +28,11 @@ export default function Header({ showOptions = false }: HeaderProps) {
   function handleLogout() {
     localStorage.clear()
     navigate('/')
+    document.location.reload()
   }
 
   function getPatientName(): string {
-    const user = JSON.parse(localStorage.getItem('user') as string) as User
+    const user = JSON.parse(localStorage.getItem('@APP:user') as string) as User
 
     if (user) {
       return user?.firstname

@@ -12,6 +12,20 @@ import { format, validate } from "../../utils/documentTreatment";
 import { api } from "../../services/api";
 
 import getFormattedCurrentDateNow from '../../utils/getFormattedCurrentDateNow'
+import { Patient, User } from "../../types";
+
+interface ICreateUser {
+	username: string
+	document: string
+	email: string
+	patient_id: string
+}
+
+interface ICreatePatient {
+  firstname: string
+  lastname: string
+  birth_date: string
+}
 
 type SignUpRequest = {
   firstname: string;
@@ -19,8 +33,6 @@ type SignUpRequest = {
   document: string;
   birth_date: string;
   email: string;
-  password: string;
-  password_confirmed: string;
 };
 
 export default function SignUp() {
@@ -30,34 +42,40 @@ export default function SignUp() {
   async function handleSignUp(data: SignUpRequest) {
     if (data) {
       try {
-        if (validate(format(data.document))) {
-          if (data.password === data.password_confirmed) {
-            const {
-              firstname,
-              lastname,
-              document,
-              birth_date,
-              email,
-              password,
-            } = data as SignUpRequest;
+        const {
+          firstname,
+          lastname,
+          document,
+          birth_date,
+          email,
+        } = data as SignUpRequest
 
-            try {
-              await api
-                .post("users", {
-                  fullname: `${firstname} ${lastname}`,
-                  document,
-                  birth_date,
-                  email,
-                  password,
-                })
-                .then(() => {
-                  navigate("/");
-                });
-            } catch (error) {
-              handleOpenDbUser();
+        if (validate(document)) {
+          const createPatientData: ICreatePatient = {
+            firstname,
+            lastname,
+            birth_date,
+          }
+
+          try {
+            const responsePatients = await api.post("/patients", createPatientData)
+            const patient: Patient = responsePatients.data.patient
+            console.log(patient)
+
+            const createUserData: ICreateUser = {
+              username: email.split('@')[0],
+              document,
+              email,
+              patient_id: patient.patient_id
             }
-          } else {
-            handleOpenDifferentPasswordsModal();
+
+            const responseUser = await api.post('/users', createUserData)
+            const user: User = responseUser.data.user
+            console.log(user)
+
+            handleOpensuccessPatientRegister()
+          } catch (error) {
+            handleOpenDbUser();
           }
         } else {
           handleOpenInvalidDocument();
@@ -71,15 +89,16 @@ export default function SignUp() {
     }
   }
 
-  // Different passwords modal
-  const [differentPasswordsModal, setDifferentPasswordsModal] = useState(false);
+  // Success
+  const [successPatientRegister, setSuccessPatientRegister] = useState(false);
 
-  function handleOpenDifferentPasswordsModal() {
-    setDifferentPasswordsModal(true);
+  function handleOpensuccessPatientRegister() {
+    setSuccessPatientRegister(true);
   }
 
-  function handleCloseDifferentPasswordsModal() {
-    setDifferentPasswordsModal(false);
+  function handleClosesuccessPatientRegister() {
+    navigate('/')
+    setSuccessPatientRegister(false);
   }
 
   // Invalid CPF Modal
@@ -105,10 +124,10 @@ export default function SignUp() {
   }
 
   function handleIfAuthRedirect() {
-    const user = JSON.parse(localStorage.getItem("user") as string);
+    const patient = JSON.parse(localStorage.getItem("@APP:patient") as string);
 
-    if (user) {
-      if (user.isRootUser === "0") {
+    if (patient) {
+      if (patient.patient_id) {
         console.log(`
           you are a regular user and you are already logged in to the application.
           redirecting...
@@ -128,14 +147,11 @@ export default function SignUp() {
   return (
     <>
       <Alert
-        isOpen={differentPasswordsModal}
-        message={`
-          As senhas informadas são incoerentes entre si.
-          Insira-as novamente.
-        `}
-        onCloseFunc={handleCloseDifferentPasswordsModal}
-        title={`Senhas não coincidem`}
-        type={`warning`}
+        isOpen={successPatientRegister}
+        message={`Paciente cadastrado com sucesso`}
+        onCloseFunc={handleClosesuccessPatientRegister}
+        title={`Cadastro concluído`}
+        type={`success`}
       />
       <Alert
         isOpen={invalidDocument}

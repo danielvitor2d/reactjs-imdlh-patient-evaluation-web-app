@@ -15,13 +15,14 @@ import {
 } from '../pages'
 
 export default function PatientAuthenticatedRoutes() {
-   return(
+  return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout page={<Home />} />}  path='/' />
+        <Route element={<Home />} path='/home' />
+        <Route element={<Home />} path='/' />
         <Route element={<Layout page={<Results />} />}  path='/results/:userId' />
         <Route element={<Layout page={<PrintResult />} />}  path='/result/:resultId' />
       </Routes>
     </BrowserRouter>
-   )
+  )
 }

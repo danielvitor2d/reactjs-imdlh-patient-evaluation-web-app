@@ -18,7 +18,7 @@ export default function Routes() {
       )
     }
 
-    return <PatientAuthenticatedRoutes />
+    return <SignRoutes />
   }
 
   return signed ? getAuthRoutes() : <SignRoutes />

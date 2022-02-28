@@ -104,24 +104,26 @@ export default function Home() {
   }
 
   function handleIfAuthRedirect() {
-    const user = JSON.parse(localStorage.getItem('user') as string)
-    const token = localStorage.getItem('token') as string
+    const patient = JSON.parse(localStorage.getItem('@APP:patient') as string)
+    const token = localStorage.getItem('@APP:token') as string
 
     if (token) {
       const jwtTokenDecoded = jwtDecode(token)
       if (jwtTokenDecoded.exp * 1000 < Date.now()) {
         localStorage.clear()
         navigate('/')
+        document.location.reload()
       }
     }
 
-    if (user) {
-      if (user.isRootUser === '1') {
+    if (patient) {
+      if (!patient.patient_id) {
         console.log(`
           you are a root user and you are already logged in to the application.
           redirecting...
         `)
         navigate(`/dashboard`)
+        document.location.reload()
       }
     }
   }

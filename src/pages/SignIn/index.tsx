@@ -34,7 +34,7 @@ export default function SignIn() {
   const navigate = useNavigate()
   const { register, handleSubmit } = useForm()
 
-  const authContext = useContext(AuthContext)
+  const { login } = useContext(AuthContext)
 
   const [userNotFoundModal, setUserNotFoundModal] = useState(false)
   const [invalidDocumentModal, setInvalidDocumentModal] = useState(false)
@@ -46,14 +46,14 @@ export default function SignIn() {
    * @param data 
    */
   async function handleSignIn(data: SignInRequest) {
-    const { document } = data
-    if (!validate(document)) {
+    const { document: _document } = data
+    if (!validate(_document)) {
       handleOpenInvalidDocumentModal()
     } else {
-      authContext
-        .login(document)
+      login(_document)
         .then(() => {
           navigate('/')
+          document.location.reload()
         })
         .catch((err) => {
           console.log(err)
@@ -63,18 +63,19 @@ export default function SignIn() {
   }
 
   function handleIfAuthRedirect() {
-    const user: User = JSON.parse(localStorage.getItem('user') as string)
-    const patient: Patient = JSON.parse(localStorage.getItem('user') as string)
+    const patient: Patient = JSON.parse(localStorage.getItem('@APP:patient') as string)
 
-    if (user) {
-      if (!patient.patient_id) {
+    if (patient) {
+      if (patient.patient_id) {
         console.log(`
           you are a regular user and you are already logged in to the application.
           redirecting...
         `)
         navigate(`/home`)
+        document.location.reload()
       } else {
         navigate(`/dashboard`)
+        document.location.reload()
       }
     }
   }

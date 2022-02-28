@@ -13,7 +13,7 @@ import {
 import GlobalStyles from './theme/global'
 import theme from './theme/theme'
 
-import Routes from './routes/SignRoutes'
+import Routes from './routes'
 import { AuthProvider } from './contexts/Auth';
 
 Chart.register(RadialLinearScale)

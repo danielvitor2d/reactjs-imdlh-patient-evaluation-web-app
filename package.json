@@ -1,5 +1,5 @@
 {
-  "name": "frontend-mui",
+  "name": "imdlh-patient-evaluation-web-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -17,6 +17,7 @@
     "@types/react-dom": "^17.0.0",
     "axios": "^0.24.0",
     "chart.js": "^3.6.1",
+    "moment": "^2.29.1",
     "react": "^17.0.2",
     "react-chartjs-2": "^4.0.0",
     "react-dom": "^17.0.2",
@@ -55,6 +56,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.0",
     "@babel/node": "^7.16.0",
+    "@types/moment": "^2.13.0",
     "@types/styled-components": "^5.1.16",
     "puppeteer": "^12.0.1"
   }
